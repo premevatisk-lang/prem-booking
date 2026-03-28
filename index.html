@@ -102,20 +102,30 @@
     }
 
     function sendBooking() {
+        // ดึงค่าจากช่องวันที่ (รูปแบบจะเป็น 2026-03-28)
         const cin = document.getElementById('checkin').value;
         const cout = document.getElementById('checkout').value;
         const nights = document.getElementById('nights').innerText;
 
+        // ตรวจสอบว่ากรอกข้อมูลครบไหม
         if (!cin || !cout || parseInt(nights) <= 0) {
             alert("กรุณาเลือกวันที่เช็คอินและเช็คเอาต์ให้ถูกต้อง");
             return;
         }
 
+        // --- ส่วนการแปลงวันที่ (หัวใจสำคัญ) ---
+        // cin.split('-') จะได้ ["2026", "03", "28"]
+        // .reverse() จะได้ ["28", "03", "2026"]
+        // .join('/') จะได้ "28/03/2026"
+        const dmyCin = cin.split('-').reverse().join('/');
+        const dmyCout = cout.split('-').reverse().join('/');
+
+        // ส่งข้อความเข้า LINE แชท
         liff.sendMessages([{
             type: 'text',
-            text: `ต้องการจองที่พัก\n📅 เช็คอิน: ${cin}\n📅 เช็คเอาต์: ${cout}\n🌙 รวม: ${nights} คืน`
+            text: `ต้องการจองที่พัก\n📅 เช็คอิน: ${dmyCin}\n📅 เช็คเอาต์: ${dmyCout}\n🌙 รวม: ${nights} คืน`
         }]).then(() => {
-            liff.closeWindow();
+            liff.closeWindow(); // ส่งเสร็จแล้วปิดหน้าจอ LIFF อัตโนมัติ
         }).catch((err) => {
             alert('Error: ' + err);
         });
