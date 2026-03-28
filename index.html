@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จองห้องพัก Prem U Thong</title>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f4f7f6; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        h2 { color: #333; text-align: center; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        .result { background: #e8f5e9; padding: 10px; border-radius: 6px; margin-top: 15px; text-align: center; font-weight: bold; color: #2e7d32; }
+        button { width: 100%; padding: 12px; background-color: #00b900; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>จองวันที่เข้าพัก</h2>
+    
+    <div class="input-group">
+        <label>วันที่เช็คอิน (Check-in):</label>
+        <input type="date" id="checkin" onchange="calculateNights()">
+    </div>
+
+    <div class="input-group">
+        <label>วันที่เช็คเอาต์ (Check-out):</label>
+        <input type="date" id="checkout" onchange="calculateNights()">
+    </div>
+
+    <div id="nightCount" class="result" style="display:none;">
+        จำนวน: <span id="nights">0</span> คืน
+    </div>
+
+    <button onclick="sendBooking()">ยืนยันการเลือกวัน</button>
+</div>
+
+<script>
+    // 1. ล็อควันที่ทันทีที่โหลดหน้าเว็บ (ไม่ต้องรอ LIFF Init)
+    window.onload = function() {
+        const today = new Date();
+        const y = today.getFullYear();
+        const m = String(today.getMonth() + 1).padStart(2, '0');
+        const d = String(today.getDate()).padStart(2, '0');
+        const minDate = `${y}-${m}-${d}`;
+
+        // บังคับค่า min ของ input ทั้งสองช่อง
+        document.getElementById('checkin').min = minDate;
+        document.getElementById('checkout').min = minDate;
+        
+        console.log("วันที่ถูกล็อคตั้งแต่วันที่: " + minDate);
+    };
+
+    // 2. เริ่มต้น LIFF แยกต่างหาก
+    async function main() {
+        try {
+            await liff.init({ liffId: "YOUR_LIFF_ID_HERE" }); 
+        } catch (err) {
+            console.error('LIFF Error', err);
+        }
+    }
+    main();
+
+    function calculateNights() {
+        const cinInput = document.getElementById('checkin');
+        const coutInput = document.getElementById('checkout');
+        const resultDiv = document.getElementById('nightCount');
+        const nightsSpan = document.getElementById('nights');
+        
+        if (cinInput.value) {
+            // เมื่อเลือกวันเช็คอินแล้ว วันเช็คเอาต์ต้องเป็น "วันถัดไป" เป็นอย่างน้อย
+            let nextDay = new Date(cinInput.value);
+            nextDay.setDate(nextDay.getDate() + 1);
+            const ny = nextDay.getFullYear();
+            const nm = String(nextDay.getMonth() + 1).padStart(2, '0');
+            const nd = String(nextDay.getDate()).padStart(2, '0');
+            coutInput.min = `${ny}-${nm}-${nd}`;
+
+            // ถ้าวันเช็คเอาต์ที่เคยเลือกไว้ ดันย้อนหลังไปทับวันเช็คอิน ให้ล้างค่าทิ้ง
+            if (coutInput.value && new Date(coutInput.value) <= new Date(cinInput.value)) {
+                coutInput.value = "";
+                resultDiv.style.display = 'none';
+            }
+        }
+
+        if (cinInput.value && coutInput.value) {
+            const cin = new Date(cinInput.value);
+            const cout = new Date(coutInput.value);
+            const diffTime = cout - cin;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays > 0) {
+                nightsSpan.innerText = diffDays;
+                resultDiv.style.display = 'block';
+            } else {
+                resultDiv.style.display = 'none';
+            }
+        }
+    }
+
+    function sendBooking() {
+        const cin = document.getElementById('checkin').value;
+        const cout = document.getElementById('checkout').value;
+        const nights = document.getElementById('nights').innerText;
+
+        if (!cin || !cout || parseInt(nights) <= 0) {
+            alert("กรุณาเลือกวันที่เช็คอินและเช็คเอาต์ให้ถูกต้อง");
+            return;
+        }
+
+        liff.sendMessages([{
+            type: 'text',
+            text: `ต้องการจองที่พัก\n📅 เช็คอิน: ${cin}\n📅 เช็คเอาต์: ${cout}\n🌙 รวม: ${nights} คืน`
+        }]).then(() => {
+            liff.closeWindow();
+        }).catch((err) => {
+            alert('Error: ' + err);
+        });
+    }
+</script>
+
+</body>
+</html>
