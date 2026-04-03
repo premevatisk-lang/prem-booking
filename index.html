@@ -3,43 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จองห้องพัก Prem U Thong</title>
+    <title>จองห้องพัก เปรม อู่ทอง (Prem U Thong)</title>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f4f7f6; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        h2 { color: #333; text-align: center; }
+        body { font-family: 'Tahoma', sans-serif; padding: 20px; background-color: #f0f2f5; color: #333; }
+        .card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-width: 450px; margin: auto; }
+        h2 { color: #00b900; text-align: center; margin-bottom: 10px; }
+        .user-info { display: flex; align-items: center; margin-bottom: 20px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-weight: bold; border: 1px solid #eee; }
+        .user-info img { width: 35px; height: 35px; border-radius: 50%; margin-right: 10px; }
+        
+        .section-title { font-weight: bold; margin: 15px 0 10px; color: #555; border-left: 4px solid #00b900; padding-left: 10px; }
         .input-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        .result { background: #e8f5e9; padding: 10px; border-radius: 6px; margin-top: 15px; text-align: center; font-weight: bold; color: #2e7d32; }
-        button { width: 100%; padding: 12px; background-color: #00b900; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background-color: #fff; }
+        
+        /* สไตล์ส่วนเลือกห้องพัก */
+        .room-item { background: #fffcf5; padding: 15px; border-radius: 10px; border: 1px solid #ffecb3; margin-bottom: 12px; position: relative; }
+        .btn-remove { position: absolute; right: 8px; top: 8px; color: #ff5252; font-size: 24px; cursor: pointer; line-height: 1; }
+        .btn-add { background: #fff; color: #00b900; border: 2px dashed #00b900; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 15px; font-size: 16px; }
+        
+        .result { background: #e8f5e9; padding: 12px; border-radius: 8px; margin-top: 15px; text-align: center; font-weight: bold; color: #2e7d32; border: 1px dashed #2e7d32; }
+        .btn-submit { width: 100%; padding: 15px; background-color: #00b900; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-top: 15px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,185,0,0.3); }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>จองวันที่เข้าพัก</h2>
+    <div class="user-info">
+        <img id="userImg" src="" style="display:none;">
+        <span id="userName">กำลังโหลดข้อมูล...</span>
+    </div>
     
+    <h2>จองที่พัก เปรม อู่ทอง</h2>
+    
+    <div class="section-title">📅 เลือกวันที่เข้าพัก</div>
     <div class="input-group">
-        <label>วันที่เช็คอิน (Check-in):</label>
-        <input type="date" id="checkin" onchange="calculateNights()">
+        <div style="display: flex; gap: 10px;">
+            <div style="flex: 1;">
+                <label>วันที่เช็คอิน:</label>
+                <input type="date" id="checkin" onchange="calculateNights()">
+            </div>
+            <div style="flex: 1;">
+                <label>วันที่เช็คเอาต์:</label>
+                <input type="date" id="checkout" onchange="calculateNights()">
+            </div>
+        </div>
     </div>
 
-    <div class="input-group">
-        <label>วันที่เช็คเอาต์ (Check-out):</label>
-        <input type="date" id="checkout" onchange="calculateNights()">
-    </div>
+    <div class="section-title">🏨 เลือกประเภทห้องพัก</div>
+    <div id="roomContainer">
+        </div>
+    <button class="btn-add" onclick="addRoom()">+ เพิ่มห้องพัก (จองมากกว่า 1 ห้อง)</button>
 
     <div id="nightCount" class="result" style="display:none;">
-        จำนวน: <span id="nights">0</span> คืน
+        รวมระยะเวลา: <span id="nights">0</span> คืน
     </div>
 
-    <button onclick="sendBooking()">ยืนยันการเลือกวัน</button>
+    <button class="btn-submit" onclick="sendBooking()">ยืนยันการส่งข้อมูล</button>
 </div>
 
 <script>
-    // 1. ล็อควันที่ทันทีที่โหลดหน้าเว็บ (ไม่ต้องรอ LIFF Init)
+    let userDisplayName = "";
+    // ปรับชื่อห้องเป็นภาษาไทย
+    const roomOptions = [
+        "ห้องดีลักซ์ เตียงคู่ (Deluxe Twin)", 
+        "ห้องดีลักซ์ เตียงใหญ่ (Deluxe Queen)", 
+        "ห้องมาตรฐาน เตียงใหญ่ (Standard Queen)"
+    ];
+
     window.onload = function() {
         const today = new Date();
         const y = today.getFullYear();
@@ -47,53 +78,69 @@
         const d = String(today.getDate()).padStart(2, '0');
         const minDate = `${y}-${m}-${d}`;
 
-        // บังคับค่า min ของ input ทั้งสองช่อง
         document.getElementById('checkin').min = minDate;
         document.getElementById('checkout').min = minDate;
         
-        console.log("วันที่ถูกล็อคตั้งแต่วันที่: " + minDate);
+        addRoom(); 
     };
 
-    // 2. เริ่มต้น LIFF แยกต่างหาก
+    function addRoom() {
+        const container = document.getElementById('roomContainer');
+        const div = document.createElement('div');
+        div.className = 'room-item';
+        
+        let optionsHtml = roomOptions.map(r => `<option value="${r}">${r}</option>`).join('');
+        
+        div.innerHTML = `
+            <span class="btn-remove" onclick="removeRoom(this)">×</span>
+            <label>ประเภทห้องที่ต้องการ:</label>
+            <select class="room-select">
+                ${optionsHtml}
+            </select>
+        `;
+        container.appendChild(div);
+    }
+
+    function removeRoom(btn) {
+        const items = document.querySelectorAll('.room-item');
+        if(items.length > 1) {
+            btn.parentElement.remove();
+        } else {
+            alert("ต้องเลือกอย่างน้อย 1 ห้องครับ");
+        }
+    }
+
     async function main() {
         try {
             await liff.init({ liffId: "2009627657-wXRtQW7E" }); 
-        } catch (err) {
-            console.error('LIFF Error', err);
-        }
+            if (liff.isLoggedIn()) {
+                const profile = await liff.getProfile();
+                userDisplayName = profile.displayName;
+                document.getElementById('userName').innerText = "คุณ " + userDisplayName;
+                if (profile.pictureUrl) {
+                    const img = document.getElementById('userImg');
+                    img.src = profile.pictureUrl;
+                    img.style.display = "block";
+                }
+            } else {
+                liff.login();
+            }
+        } catch (err) { console.error(err); }
     }
     main();
 
     function calculateNights() {
-        const cinInput = document.getElementById('checkin');
-        const coutInput = document.getElementById('checkout');
+        const cin = document.getElementById('checkin').value;
+        const cout = document.getElementById('checkout').value;
         const resultDiv = document.getElementById('nightCount');
-        const nightsSpan = document.getElementById('nights');
         
-        if (cinInput.value) {
-            // เมื่อเลือกวันเช็คอินแล้ว วันเช็คเอาต์ต้องเป็น "วันถัดไป" เป็นอย่างน้อย
-            let nextDay = new Date(cinInput.value);
-            nextDay.setDate(nextDay.getDate() + 1);
-            const ny = nextDay.getFullYear();
-            const nm = String(nextDay.getMonth() + 1).padStart(2, '0');
-            const nd = String(nextDay.getDate()).padStart(2, '0');
-            coutInput.min = `${ny}-${nm}-${nd}`;
-
-            // ถ้าวันเช็คเอาต์ที่เคยเลือกไว้ ดันย้อนหลังไปทับวันเช็คอิน ให้ล้างค่าทิ้ง
-            if (coutInput.value && new Date(coutInput.value) <= new Date(cinInput.value)) {
-                coutInput.value = "";
-                resultDiv.style.display = 'none';
-            }
-        }
-
-        if (cinInput.value && coutInput.value) {
-            const cin = new Date(cinInput.value);
-            const cout = new Date(coutInput.value);
-            const diffTime = cout - cin;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (cin && cout) {
+            const d1 = new Date(cin);
+            const d2 = new Date(cout);
+            const diff = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
             
-            if (diffDays > 0) {
-                nightsSpan.innerText = diffDays;
+            if (diff > 0) {
+                document.getElementById('nights').innerText = diff;
                 resultDiv.style.display = 'block';
             } else {
                 resultDiv.style.display = 'none';
@@ -102,33 +149,35 @@
     }
 
     function sendBooking() {
-        // ดึงค่าจากช่องวันที่ (รูปแบบจะเป็น 2026-03-28)
         const cin = document.getElementById('checkin').value;
         const cout = document.getElementById('checkout').value;
         const nights = document.getElementById('nights').innerText;
+        const roomSelects = document.querySelectorAll('.room-select');
+        
+        let rooms = [];
+        roomSelects.forEach(s => rooms.push(s.value));
 
-        // ตรวจสอบว่ากรอกข้อมูลครบไหม
         if (!cin || !cout || parseInt(nights) <= 0) {
             alert("กรุณาเลือกวันที่เช็คอินและเช็คเอาต์ให้ถูกต้อง");
             return;
         }
 
-        // --- ส่วนการแปลงวันที่ (หัวใจสำคัญ) ---
-        // cin.split('-') จะได้ ["2026", "03", "28"]
-        // .reverse() จะได้ ["28", "03", "2026"]
-        // .join('/') จะได้ "28/03/2026"
         const dmyCin = cin.split('-').reverse().join('/');
         const dmyCout = cout.split('-').reverse().join('/');
+        
+        const roomSummary = rooms.reduce((acc, curr) => {
+            acc[curr] = (acc[curr] || 0) + 1;
+            return acc;
+        }, {});
+        
+        let roomText = Object.keys(roomSummary).map(key => `- ${key}: ${roomSummary[key]} ห้อง`).join('\n');
 
-        // ส่งข้อความเข้า LINE แชท
-        liff.sendMessages([{
-            type: 'text',
-            text: `ต้องการจองที่พัก\n📅 เช็คอิน: ${dmyCin}\n📅 เช็คเอาต์: ${dmyCout}\n🌙 รวม: ${nights} คืน`
-        }]).then(() => {
-            liff.closeWindow(); // ส่งเสร็จแล้วปิดหน้าจอ LIFF อัตโนมัติ
-        }).catch((err) => {
-            alert('Error: ' + err);
-        });
+        // ข้อความสรุปเป็นภาษาไทย
+        const msg = `🔔 แจ้งจองที่พักใหม่!\n👤 ชื่อลูกค้า: ${userDisplayName}\n📅 เช็คอิน: ${dmyCin}\n📅 เช็คเอาต์: ${dmyCout}\n🌙 จำนวน: ${nights} คืน\n🏨 รายละเอียดห้องพัก:\n${roomText}`;
+
+        liff.sendMessages([{ type: 'text', text: msg }]).then(() => {
+            liff.closeWindow();
+        }).catch(err => alert("เกิดข้อผิดพลาด: " + err));
     }
 </script>
 
