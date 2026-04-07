@@ -37,6 +37,10 @@
     
     <div class="section-title">📞 ข้อมูลผู้เข้าพัก</div>
     <div class="input-group">
+        <label>ชื่อผู้เข้าพัก:</label>
+        <input type="text" id="customName" placeholder="ระบุชื่อที่จะใช้จอง">
+    </div>
+    <div class="input-group">
         <label>เบอร์โทรศัพท์ติดต่อ:</label>
         <input type="tel" id="userPhone" placeholder="ระบุเบอร์โทรศัพท์" maxlength="10">
     </div>
@@ -56,8 +60,7 @@
     </div>
 
     <div class="section-title">🏨 เลือกประเภทห้องพัก</div>
-    <div id="roomContainer">
-        </div>
+    <div id="roomContainer"></div>
     <button class="btn-add" onclick="addRoom()">+ เพิ่มห้องพัก (จองมากกว่า 1 ห้อง)</button>
 
     <div id="nightCount" class="result" style="display:none;">
@@ -84,6 +87,12 @@
 
         document.getElementById('checkin').min = minDate;
         document.getElementById('checkout').min = minDate;
+
+        // ดึงข้อมูลเก่าที่เคยกรอกไว้มาแสดง (ถ้ามี)
+        const savedName = localStorage.getItem('prem_saved_name');
+        const savedPhone = localStorage.getItem('prem_saved_phone');
+        if (savedName) document.getElementById('customName').value = savedName;
+        if (savedPhone) document.getElementById('userPhone').value = savedPhone;
         
         addRoom(); 
     };
@@ -120,7 +129,7 @@
             if (liff.isLoggedIn()) {
                 const profile = await liff.getProfile();
                 userDisplayName = profile.displayName;
-                document.getElementById('userName').innerText = "คุณ " + userDisplayName;
+                document.getElementById('userName').innerText = "LINE: " + userDisplayName;
                 if (profile.pictureUrl) {
                     const img = document.getElementById('userImg');
                     img.src = profile.pictureUrl;
@@ -153,13 +162,17 @@
     }
 
     function sendBooking() {
+        const customName = document.getElementById('customName').value; // ชื่อที่ลูกค้าพิมพ์
         const phone = document.getElementById('userPhone').value;
         const cin = document.getElementById('checkin').value;
         const cout = document.getElementById('checkout').value;
         const nights = document.getElementById('nights').innerText;
         const roomSelects = document.querySelectorAll('.room-select');
         
-        // ตรวจสอบข้อมูลเบื้องต้น
+        if (!customName) {
+            alert("กรุณาระบุชื่อผู้เข้าพักด้วยครับ");
+            return;
+        }
         if (!phone || phone.length < 9) {
             alert("กรุณาระบุเบอร์โทรศัพท์ให้ถูกต้อง");
             return;
@@ -168,6 +181,10 @@
             alert("กรุณาเลือกวันที่เช็คอินและเช็คเอาท์ให้ถูกต้อง");
             return;
         }
+
+        // บันทึกข้อมูลลงเครื่องลูกค้า เพื่อให้รอบหน้าไม่ต้องพิมพ์ใหม่
+        localStorage.setItem('prem_saved_name', customName);
+        localStorage.setItem('prem_saved_phone', phone);
 
         let rooms = [];
         roomSelects.forEach(s => rooms.push(s.value));
@@ -182,7 +199,8 @@
         
         let roomText = Object.keys(roomSummary).map(key => `- ${key}: ${roomSummary[key]} ห้อง`).join('\n');
 
-        const msg = `🔔 แจ้งจองที่พักใหม่!\n👤 ชื่อลูกค้า: ${userDisplayName}\n📞 เบอร์โทร: ${phone}\n📅 เช็คอิน: ${dmyCin}\n📅 เช็คเอาท์: ${dmyCout}\n🌙 จำนวน: ${nights} คืน\n🏨 รายละเอียดห้องพัก:\n${roomText}`;
+        // ปรับข้อความส่งไลน์ให้ใช้ customName
+        const msg = `🔔 แจ้งจองที่พักใหม่!\n👤 ชื่อลูกค้า: ${customName}\n📞 เบอร์โทร: ${phone}\n📅 เช็คอิน: ${dmyCin}\n📅 เช็คเอาท์: ${dmyCout}\n🌙 จำนวน: ${nights} คืน\n🏨 รายละเอียดห้องพัก:\n${roomText}`;
 
         liff.sendMessages([{ type: 'text', text: msg }]).then(() => {
             liff.closeWindow();
