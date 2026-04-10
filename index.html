@@ -29,7 +29,9 @@
         .room-row { display: flex; gap: 10px; margin-top: 10px; align-items: flex-start; }
         .checkbox-group { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px; }
         .checkbox-group input { width: 18px; height: 18px; margin: 0; }
-        .warning-text { color: #ff5252; font-size: 12px; margin-top: 4px; font-weight: bold; display: none; }
+        
+        /* กลับมาใช้สีแดงสดเพื่อความเด่นชัด */
+        .warning-text { color: #ff5252; font-size: 12px; margin-top: 6px; font-weight: bold; display: none; line-height: 1.4; }
     </style>
 </head>
 <body>
@@ -79,7 +81,6 @@
 
 <script>
     let userDisplayName = "";
-    // เอาข้อความพ่วงท้ายใน Option ออกเพื่อให้ดูสะอาดตา
     const roomOptions = [
         "ห้องดีลักซ์ เตียงคู่ (Deluxe Twin)", 
         "ห้องดีลักซ์ เตียงใหญ่ (Deluxe Queen)", 
@@ -120,7 +121,7 @@
                 <div style="flex: 1;">
                     <label>จำนวนคน:</label>
                     <input type="number" class="guest-count" value="1" min="1" max="4" oninput="checkGuestLimit(this)">
-                    <div class="warning-text">เกิน 2 ท่าน ต้องมีเตียงเสริม</div>
+                    <div class="warning-text">กรณีพักเกิน 2 ท่าน โรงแรมขอบริการเตียงเสริมครับ</div>
                 </div>
                 <div style="flex: 1.2; padding-top: 20px;">
                     <label class="checkbox-group">
