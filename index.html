@@ -24,10 +24,10 @@
         .result { background: #e8f5e9; padding: 12px; border-radius: 8px; margin-top: 15px; text-align: center; font-weight: bold; color: #2e7d32; border: 1px dashed #2e7d32; }
         .btn-submit { width: 100%; padding: 15px; background-color: #00b900; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-top: 15px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,185,0,0.3); }
         
-        /* สไตล์เพิ่มเติมสำหรับจำนวนคนและเตียงเสริม */
-        .room-row { display: flex; gap: 10px; margin-top: 10px; align-items: center; }
+        .room-row { display: flex; gap: 10px; margin-top: 10px; align-items: flex-start; }
         .checkbox-group { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px; }
         .checkbox-group input { width: 18px; height: 18px; margin: 0; }
+        .warning-text { color: #ff5252; font-size: 12px; margin-top: 4px; font-weight: bold; display: none; }
     </style>
 </head>
 <body>
@@ -78,9 +78,9 @@
 <script>
     let userDisplayName = "";
     const roomOptions = [
-        "ห้องดีลักซ์ เตียงคู่ (Deluxe Twin)", 
-        "ห้องดีลักซ์ เตียงใหญ่ (Deluxe Queen)", 
-        "ห้องมาตรฐาน เตียงใหญ่ (Standard Queen)"
+        "ห้องดีลักซ์ เตียงคู่ (พักได้สูงสุด 2 ท่าน)", 
+        "ห้องดีลักซ์ เตียงใหญ่ (พักได้สูงสุด 2 ท่าน)", 
+        "ห้องมาตรฐาน เตียงใหญ่ (พักได้สูงสุด 2 ท่าน)"
     ];
 
     window.onload = function() {
@@ -115,8 +115,9 @@
             
             <div class="room-row">
                 <div style="flex: 1;">
-                    <label>จำนวนคน (สูงสุด 2):</label>
-                    <input type="number" class="guest-count" value="1" min="1" max="2">
+                    <label>จำนวนคน:</label>
+                    <input type="number" class="guest-count" value="1" min="1" max="3" oninput="checkGuestLimit(this)">
+                    <div class="warning-text">เกิน 2 ท่าน ต้องมีเตียงเสริม</div>
                 </div>
                 <div style="flex: 1.2; padding-top: 20px;">
                     <label class="checkbox-group">
@@ -126,6 +127,19 @@
             </div>
         `;
         container.appendChild(div);
+    }
+
+    // ฟังก์ชันตรวจสอบจำนวนคนและแจ้งเตือน
+    function checkGuestLimit(input) {
+        const warning = input.nextElementSibling;
+        const extraBedCheckbox = input.parentElement.nextElementSibling.querySelector('.extra-bed');
+        
+        if (parseInt(input.value) > 2) {
+            warning.style.display = 'block';
+            extraBedCheckbox.checked = true; // ติ๊กเตียงเสริมให้อัตโนมัติ
+        } else {
+            warning.style.display = 'none';
+        }
     }
 
     function removeRoom(btn) {
