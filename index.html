@@ -13,6 +13,8 @@
         .user-info img { width: 35px; height: 35px; border-radius: 50%; margin-right: 10px; }
         
         .section-title { font-weight: bold; margin: 15px 0 10px; color: #555; border-left: 4px solid #00b900; padding-left: 10px; }
+        .section-title span { font-size: 13px; color: #888; font-weight: normal; margin-left: 5px; }
+        
         .input-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background-color: #fff; }
@@ -64,7 +66,7 @@
         </div>
     </div>
 
-    <div class="section-title">🏨 รายละเอียดห้องพัก</div>
+    <div class="section-title">🏨 รายละเอียดห้องพัก <span>(2 ท่าน/ห้อง)</span></div>
     <div id="roomContainer"></div>
     <button class="btn-add" onclick="addRoom()">+ เพิ่มห้องพัก</button>
 
@@ -77,10 +79,11 @@
 
 <script>
     let userDisplayName = "";
+    // เอาข้อความพ่วงท้ายใน Option ออกเพื่อให้ดูสะอาดตา
     const roomOptions = [
-        "ห้องดีลักซ์ เตียงคู่ (พักได้สูงสุด 2 ท่าน)", 
-        "ห้องดีลักซ์ เตียงใหญ่ (พักได้สูงสุด 2 ท่าน)", 
-        "ห้องมาตรฐาน เตียงใหญ่ (พักได้สูงสุด 2 ท่าน)"
+        "ห้องดีลักซ์ เตียงคู่ (Deluxe Twin)", 
+        "ห้องดีลักซ์ เตียงใหญ่ (Deluxe Queen)", 
+        "ห้องมาตรฐาน เตียงใหญ่ (Standard Queen)"
     ];
 
     window.onload = function() {
@@ -116,7 +119,7 @@
             <div class="room-row">
                 <div style="flex: 1;">
                     <label>จำนวนคน:</label>
-                    <input type="number" class="guest-count" value="1" min="1" max="3" oninput="checkGuestLimit(this)">
+                    <input type="number" class="guest-count" value="1" min="1" max="4" oninput="checkGuestLimit(this)">
                     <div class="warning-text">เกิน 2 ท่าน ต้องมีเตียงเสริม</div>
                 </div>
                 <div style="flex: 1.2; padding-top: 20px;">
@@ -129,16 +132,18 @@
         container.appendChild(div);
     }
 
-    // ฟังก์ชันตรวจสอบจำนวนคนและแจ้งเตือน
     function checkGuestLimit(input) {
         const warning = input.nextElementSibling;
         const extraBedCheckbox = input.parentElement.nextElementSibling.querySelector('.extra-bed');
+        const val = parseInt(input.value);
         
-        if (parseInt(input.value) > 2) {
+        if (val > 2) {
             warning.style.display = 'block';
-            extraBedCheckbox.checked = true; // ติ๊กเตียงเสริมให้อัตโนมัติ
+            extraBedCheckbox.checked = true; 
+            extraBedCheckbox.disabled = true; 
         } else {
             warning.style.display = 'none';
+            extraBedCheckbox.disabled = false; 
         }
     }
 
@@ -201,16 +206,27 @@
         if (!phone || phone.length < 9) { alert("กรุณาระบุเบอร์โทรศัพท์"); return; }
         if (!cin || !cout || parseInt(nights) <= 0) { alert("กรุณาเลือกวันที่เข้าพัก"); return; }
 
-        localStorage.setItem('prem_saved_name', customName);
-        localStorage.setItem('prem_saved_phone', phone);
-
         let roomText = "";
+        let validationError = false;
+
         roomItems.forEach((item, index) => {
             const type = item.querySelector('.room-select').value;
-            const guests = item.querySelector('.guest-count').value;
-            const hasExtraBed = item.querySelector('.extra-bed').checked ? " (+เตียงเสริม)" : "";
-            roomText += `${index + 1}. ${type}\n   └ พัก ${guests} ท่าน${hasExtraBed}\n`;
+            const guests = parseInt(item.querySelector('.guest-count').value);
+            const isExtraBed = item.querySelector('.extra-bed').checked;
+            
+            if (guests > 2 && !isExtraBed) { validationError = true; }
+
+            const extraText = isExtraBed ? " (+เตียงเสริม)" : "";
+            roomText += `${index + 1}. ${type}\n   └ พัก ${guests} ท่าน${extraText}\n`;
         });
+
+        if (validationError) {
+            alert("ห้องที่มีผู้เข้าพักเกิน 2 ท่าน จำเป็นต้องระบุเตียงเสริมครับ");
+            return;
+        }
+
+        localStorage.setItem('prem_saved_name', customName);
+        localStorage.setItem('prem_saved_phone', phone);
 
         const dmyCin = cin.split('-').reverse().join('/');
         const dmyCout = cout.split('-').reverse().join('/');
