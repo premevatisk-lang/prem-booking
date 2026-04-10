@@ -8,29 +8,39 @@
     <style>
         body { font-family: 'Tahoma', sans-serif; padding: 20px; background-color: #f0f2f5; color: #333; }
         .card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); max-width: 450px; margin: auto; }
-        h2 { color: #00b900; text-align: center; margin-bottom: 10px; }
+        
+        /* 1. เปลี่ยนหัวข้อเป็นสีส้ม Pantone 021C (#FF6800) */
+        h2 { color: #FF6800; text-align: center; margin-bottom: 10px; }
+        
         .user-info { display: flex; align-items: center; margin-bottom: 20px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-weight: bold; border: 1px solid #eee; }
         .user-info img { width: 35px; height: 35px; border-radius: 50%; margin-right: 10px; }
         
-        .section-title { font-weight: bold; margin: 15px 0 10px; color: #555; border-left: 4px solid #00b900; padding-left: 10px; }
+        /* เปลี่ยนเส้นข้างหัวข้อเป็นสีส้ม */
+        .section-title { font-weight: bold; margin: 15px 0 10px; color: #555; border-left: 4px solid #FF6800; padding-left: 10px; }
         .section-title span { font-size: 13px; color: #888; font-weight: normal; margin-left: 5px; }
         
         .input-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background-color: #fff; }
         
+        /* 2. เพิ่มระยะห่างระหว่างวันที่ (gap: 20px) */
+        .date-container { display: flex; gap: 20px; } 
+        .date-container > div { flex: 1; }
+
         .room-item { background: #fffcf5; padding: 15px; border-radius: 10px; border: 1px solid #ffecb3; margin-bottom: 12px; position: relative; }
         .btn-remove { position: absolute; right: 8px; top: 8px; color: #ff5252; font-size: 24px; cursor: pointer; line-height: 1; }
-        .btn-add { background: #fff; color: #00b900; border: 2px dashed #00b900; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 15px; font-size: 16px; }
         
-        .result { background: #e8f5e9; padding: 12px; border-radius: 8px; margin-top: 15px; text-align: center; font-weight: bold; color: #2e7d32; border: 1px dashed #2e7d32; }
-        .btn-submit { width: 100%; padding: 15px; background-color: #00b900; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-top: 15px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,185,0,0.3); }
+        /* ปุ่มเพิ่มห้อง ใช้สีส้ม */
+        .btn-add { background: #fff; color: #FF6800; border: 2px dashed #FF6800; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 15px; font-size: 16px; }
+        
+        .result { background: #fff3e0; padding: 12px; border-radius: 8px; margin-top: 15px; text-align: center; font-weight: bold; color: #e65100; border: 1px dashed #FF6800; }
+        
+        /* 3. ปุ่มยืนยันสีส้ม Pantone 021C */
+        .btn-submit { width: 100%; padding: 15px; background-color: #FF6800; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-top: 15px; font-weight: bold; box-shadow: 0 4px 10px rgba(255,104,0,0.3); }
         
         .room-row { display: flex; gap: 10px; margin-top: 10px; align-items: flex-start; }
         .checkbox-group { display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px; }
         .checkbox-group input { width: 18px; height: 18px; margin: 0; }
-        
-        /* กลับมาใช้สีแดงสดเพื่อความเด่นชัด */
         .warning-text { color: #ff5252; font-size: 12px; margin-top: 6px; font-weight: bold; display: none; line-height: 1.4; }
     </style>
 </head>
@@ -47,7 +57,7 @@
     <div class="section-title">📞 ข้อมูลผู้เข้าพัก</div>
     <div class="input-group">
         <label>ชื่อผู้เข้าพัก:</label>
-        <input type="text" id="customName" placeholder="ระบุชื่อที่จะใช้จอง">
+        <input type="text" id="customName" placeholder="ระบุชื่อผู้เข้าพัก">
     </div>
     <div class="input-group">
         <label>เบอร์โทรศัพท์ติดต่อ:</label>
@@ -56,12 +66,12 @@
 
     <div class="section-title">📅 เลือกวันที่เข้าพัก</div>
     <div class="input-group">
-        <div style="display: flex; gap: 10px;">
-            <div style="flex: 1;">
+        <div class="date-container">
+            <div>
                 <label>วันที่เช็คอิน:</label>
                 <input type="date" id="checkin" onchange="calculateNights()">
             </div>
-            <div style="flex: 1;">
+            <div>
                 <label>วันที่เช็คเอาท์:</label>
                 <input type="date" id="checkout" onchange="calculateNights()">
             </div>
