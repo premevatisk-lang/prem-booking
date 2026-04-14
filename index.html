@@ -28,7 +28,16 @@
         .btn-remove { position: absolute; right: 8px; top: 8px; color: #ff5252; font-size: 24px; cursor: pointer; line-height: 1; }
         .btn-add { background: #fff; color: #FF6800; border: 2px dashed #FF6800; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 15px; font-size: 16px; }
         
+        /* สไตล์ส่วนของบิลบริษัท */
+        .billing-group { display: flex; gap: 20px; background: #fff; padding: 10px; border-radius: 8px; }
+        .radio-item { display: flex; align-items: center; gap: 8px; font-size: 15px; cursor: pointer; }
+        .radio-item input { width: 18px; height: 18px; cursor: pointer; }
+
         .result { background: #fff3e0; padding: 12px; border-radius: 8px; margin-top: 15px; text-align: center; font-weight: bold; color: #e65100; border: 1px dashed #FF6800; }
+        
+        /* สไตล์ข้อความหมายเหตุแอดมิน */
+        .admin-note { margin-top: 15px; font-size: 13px; color: #777; text-align: center; line-height: 1.5; padding: 0 10px; }
+        
         .btn-submit { width: 100%; padding: 15px; background-color: #FF6800; color: white; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; margin-top: 15px; font-weight: bold; box-shadow: 0 4px 10px rgba(255,104,0,0.3); }
         
         .room-row { display: flex; gap: 10px; margin-top: 10px; align-items: flex-start; }
@@ -42,7 +51,7 @@
 <div class="card">
     <div class="user-info">
         <img id="userImg" src="" style="display:none;">
-        <span id="userName">กำลังโหลดข้อมูล...</span>
+        <span id="userName">กำลังโหลดข้อมูลโปรไฟล์...</span>
     </div>
     
     <h2>จองที่พัก เปรม อู่ทอง</h2>
@@ -55,6 +64,16 @@
     <div class="input-group">
         <label>เบอร์โทรศัพท์ติดต่อ:</label>
         <input type="tel" id="userPhone" placeholder="ระบุเบอร์โทรศัพท์" maxlength="10">
+    </div>
+
+    <div class="section-title">🧾 การออกบิล/ใบกำกับภาษี</div>
+    <div class="billing-group">
+        <label class="radio-item">
+            <input type="radio" name="billOption" value="ไม่มี" checked> ไม่มี
+        </label>
+        <label class="radio-item">
+            <input type="radio" name="billOption" value="ต้องการบิลในนามบริษัท"> ในนามบริษัท
+        </label>
     </div>
 
     <div class="section-title">📅 เลือกวันที่เข้าพัก</div>
@@ -79,10 +98,16 @@
         รวมระยะเวลา: <span id="nights">0</span> คืน
     </div>
 
-    <button class="btn-submit" onclick="sendBooking()">ยืนยันการจอง</button>
+    <div class="admin-note">
+        ✨ <b>ทางโรงแรมได้รับข้อมูลของท่านแล้ว</b><br>
+        กรุณารอสักครู่ เจ้าหน้าที่จะดำเนินการตรวจสอบสถานะห้องว่าง<br>และติดต่อกลับเพื่อยืนยันการจองผ่านช่องทางนี้ครับ
+    </div>
+
+    <button class="btn-submit" onclick="sendBooking()">ส่งข้อมูลการจอง</button>
 </div>
 
 <script>
+    let userDisplayName = "";
     const roomOptions = ["ห้องดีลักซ์ เตียงคู่ (Deluxe Twin)", "ห้องดีลักซ์ เตียงใหญ่ (Deluxe Queen)", "ห้องมาตรฐาน เตียงใหญ่ (Standard Queen)"];
 
     window.onload = function() {
@@ -94,7 +119,6 @@
         document.getElementById('checkin').min = minDate;
         document.getElementById('checkout').min = minDate;
         
-        // ดึงข้อมูลเดิมมาแสดง
         const savedName = localStorage.getItem('prem_saved_name');
         const savedPhone = localStorage.getItem('prem_saved_phone');
         if (savedName) document.getElementById('customName').value = savedName;
@@ -179,6 +203,7 @@
         const cin = document.getElementById('checkin').value;
         const cout = document.getElementById('checkout').value;
         const nights = document.getElementById('nights').innerText;
+        const billOption = document.querySelector('input[name="billOption"]:checked').value;
         const roomItems = document.querySelectorAll('.room-item');
         
         if (!customName || !phone || !cin || !cout || parseInt(nights) <= 0) { 
@@ -195,36 +220,11 @@
 
         localStorage.setItem('prem_saved_name', customName);
         localStorage.setItem('prem_saved_phone', phone);
-        
-        // ข้อความสรุปข้อมูลที่จะเด้งในแชท
-        const summaryMsg = `🔔 สรุปข้อมูลการจองที่พัก\n👤 ชื่อ: ${customName}\n📞 โทร: ${phone}\n📅 เช็คอิน: ${cin.split('-').reverse().join('/')}\n📅 เช็คเอาท์: ${cout.split('-').reverse().join('/')}\n🌙 จำนวน: ${nights} คืน\n🏨 รายละเอียด:\n${roomText}\n------------------\nคุณลูกค้ามีออกบิลในนามบริษัทหรือไม่ครับ?`;
 
-        liff.sendMessages([
-            {
-                type: 'text',
-                text: summaryMsg,
-                quickReply: {
-                    items: [
-                        {
-                            type: 'action',
-                            action: {
-                                type: 'message',
-                                label: 'มี (บิลบริษัท)',
-                                text: 'มีออกบิลบริษัทครับ'
-                            }
-                        },
-                        {
-                            type: 'action',
-                            action: {
-                                type: 'message',
-                                label: 'ไม่มี (บิลปกติ)',
-                                text: 'ไม่มีออกบิลบริษัทครับ'
-                            }
-                        }
-                    ]
-                }
-            }
-        ]).then(() => {
+        const msg = `🔔 แจ้งจองที่พักใหม่!\n👤 ชื่อ: ${customName}\n📞 โทร: ${phone}\n📅 เช็คอิน: ${cin.split('-').reverse().join('/')}\n📅 เช็คเอาท์: ${cout.split('-').reverse().join('/')}\n🌙 จำนวน: ${nights} คืน\n🧾 บิล: ${billOption}\n🏨 รายละเอียด:\n${roomText}`;
+
+        liff.sendMessages([{ type: 'text', text: msg }]).then(() => {
+            alert("ส่งคำขอจองเรียบร้อยแล้ว กรุณารอเจ้าหน้าที่แจ้งยืนยันครับ");
             liff.closeWindow();
         }).catch(err => console.error(err));
     }
