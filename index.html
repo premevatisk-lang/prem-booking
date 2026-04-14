@@ -20,10 +20,9 @@
         label { display: block; margin-bottom: 5px; font-size: 14px; color: #666; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 16px; background-color: #fff; }
         
-        /* แก้ไขระยะห่างวันที่ให้เสถียรขึ้น */
         .date-container { display: flex; } 
         .date-container > div { flex: 1; }
-        .date-container > div:first-child { margin-right: 15px; } /* เว้นช่องว่างระหว่างวันเช็คอิน-เอาท์ */
+        .date-container > div:first-child { margin-right: 15px; }
 
         .room-item { background: #fffcf5; padding: 15px; border-radius: 10px; border: 1px solid #ffecb3; margin-bottom: 12px; position: relative; }
         .btn-remove { position: absolute; right: 8px; top: 8px; color: #ff5252; font-size: 24px; cursor: pointer; line-height: 1; }
@@ -43,7 +42,7 @@
 <div class="card">
     <div class="user-info">
         <img id="userImg" src="" style="display:none;">
-        <span id="userName">กำลัง加載ข้อมูล...</span>
+        <span id="userName">กำลังโหลดข้อมูล...</span>
     </div>
     
     <h2>จองที่พัก เปรม อู่ทอง</h2>
@@ -84,7 +83,6 @@
 </div>
 
 <script>
-    // โค้ด Logic เดิมทั้งหมด (ย่อเพื่อความสั้น)
     let userDisplayName = "";
     const roomOptions = ["ห้องดีลักซ์ เตียงคู่ (Deluxe Twin)", "ห้องดีลักซ์ เตียงใหญ่ (Deluxe Queen)", "ห้องมาตรฐาน เตียงใหญ่ (Standard Queen)"];
 
@@ -177,14 +175,47 @@
             const type = item.querySelector('.room-select').value;
             const guests = item.querySelector('.guest-count').value;
             const extra = item.querySelector('.extra-bed').checked ? " (+เตียงเสริม)" : "";
-            roomText += `${index + 1}. ${type}\n   └ พัก ${guests} ท่าน${extra}\n`;
+            roomText += `${index + 1}. ${type}\n    └ พัก ${guests} ท่าน${extra}\n`;
         });
 
         localStorage.setItem('prem_saved_name', customName);
         localStorage.setItem('prem_saved_phone', phone);
+        
         const msg = `🔔 แจ้งจองที่พักใหม่!\n👤 ชื่อ: ${customName}\n📞 โทร: ${phone}\n📅 เช็คอิน: ${cin.split('-').reverse().join('/')}\n📅 เช็คเอาท์: ${cout.split('-').reverse().join('/')}\n🌙 จำนวน: ${nights} คืน\n🏨 รายละเอียด:\n${roomText}`;
 
-        liff.sendMessages([{ type: 'text', text: msg }]).then(() => liff.closeWindow()).catch(err => console.error(err));
+        // เพิ่มโครงสร้าง Quick Reply ตามที่ต้องการ
+        liff.sendMessages([
+            {
+                type: 'text',
+                text: msg
+            },
+            {
+                type: 'text',
+                text: 'คุณลูกค้าต้องการให้ออกบิลในนามบริษัท/นิติบุคคลไหมครับ?',
+                quickReply: {
+                    items: [
+                        {
+                            type: 'action',
+                            action: {
+                                type: 'message',
+                                label: 'ต้องการบิลบริษัท',
+                                text: 'ต้องการบิลบริษัทครับ'
+                            }
+                        },
+                        {
+                            type: 'action',
+                            action: {
+                                type: 'message',
+                                label: 'ไม่ต้องการบิล',
+                                text: 'ไม่ต้องการบิลครับ'
+                            }
+                        }
+                    ]
+                }
+            }
+        ]).then(() => {
+            liff.closeWindow();
+        }).catch(err => console.error(err));
     }
 </script>
 </body>
