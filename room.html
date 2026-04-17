@@ -103,7 +103,14 @@
         <button class="btn-view">ดูรูป</button>
     </div>
 
-    <div class="room-option" onclick="selectRoom('DELUXE QUEEN ROOM', 'https://img1.pic.in.th/images/-e8b3784ec41537d4.webp')">
+    <div class="room-option" onclick="selectRoom('DELUXE QUEEN ROOM', [
+        'https://img1.pic.in.th/images/-e8b3784ec41537d4.webp',
+        'https://img2.pic.in.th/-13d6954e0a8ebf527.jpg',
+        'https://img1.pic.in.th/images/-278b159a98c16c16b.jpg',
+        'https://img2.pic.in.th/-3ad4f1d392b2e1dd5.jpg',
+        'https://img2.pic.in.th/-4f03a7ff0758ea940.jpg',
+        'https://img1.pic.in.th/images/-57c99c241bf469f94.jpg'
+    ])">
         <div class="bg-image" style="background-image: url('https://img1.pic.in.th/images/-e8b3784ec41537d4.webp');"></div>
         <div class="overlay"></div>
         <div class="room-content">
@@ -125,7 +132,6 @@
 
     <script>
         async function main() {
-            // แก้ไขเป็น LIFF ID ใหม่ของคุณเรียบร้อยแล้ว
             await liff.init({ liffId: "2009771700-rY8tDuLA" }); 
             if (!liff.isLoggedIn()) {
                 liff.login();
@@ -133,10 +139,45 @@
         }
         main();
 
-        function selectRoom(roomName, imageUrl) {
+        function selectRoom(roomName, imageUrls) {
+            let mediaMessage;
+
+            // ตรวจสอบว่าเป็น Array (หลายรูป) หรือ String (รูปเดียว)
+            if (Array.isArray(imageUrls)) {
+                // สร้าง Carousel สำหรับหลายรูป
+                const bubbles = imageUrls.map(url => ({
+                    "type": "bubble",
+                    "size": "micro",
+                    "hero": {
+                        "type": "image",
+                        "url": url,
+                        "size": "full",
+                        "aspectRatio": "4:3",
+                        "aspectMode": "cover",
+                        "action": { "type": "uri", "uri": url }
+                    }
+                }));
+
+                mediaMessage = {
+                    "type": "flex",
+                    "altText": "รูปภาพห้องพัก " + roomName,
+                    "contents": {
+                        "type": "carousel",
+                        "contents": bubbles
+                    }
+                };
+            } else {
+                // ส่งเป็นรูปภาพปกติ
+                mediaMessage = {
+                    "type": "image",
+                    "originalContentUrl": imageUrls,
+                    "previewImageUrl": imageUrls
+                };
+            }
+
             liff.sendMessages([
                 { "type": "text", "text": "ขอดูรูปภาพ " + roomName },
-                { "type": "image", "originalContentUrl": imageUrl, "previewImageUrl": imageUrl }
+                mediaMessage
             ]).then(() => {
                 liff.closeWindow();
             }).catch((err) => {
