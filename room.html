@@ -93,8 +93,14 @@
         <h2 style="color: #FF6B00;">ประเภทห้องพัก</h2>
     </div>
 
-    <div class="room-option" onclick="selectRoom('DELUXE TWIN ROOM', 'https://img2.pic.in.th/4efaf7dcbce1dcb63355d719a4658012.jpg')">
-        <div class="bg-image" style="background-image: url('https://img2.pic.in.th/4efaf7dcbce1dcb63355d719a4658012.jpg');"></div>
+    <div class="room-option" onclick="selectRoom('DELUXE TWIN ROOM', [
+        'https://img2.pic.in.th/-149f4b32e928a70d0.jpg',
+        'https://img1.pic.in.th/images/-246c483f880b34ea9.jpg',
+        'https://img2.pic.in.th/-3bbdc375f9c88fda9.jpg',
+        'https://img1.pic.in.th/images/-46f15f32784394c80.jpg',
+        'https://img1.pic.in.th/images/-506fa05586e0fa99c.jpg'
+    ])">
+        <div class="bg-image" style="background-image: url('https://img2.pic.in.th/-149f4b32e928a70d0.jpg');"></div>
         <div class="overlay"></div>
         <div class="room-content">
             <span class="en-name">DELUXE TWIN ROOM</span>
@@ -120,8 +126,14 @@
         <button class="btn-view">ดูรูป</button>
     </div>
 
-    <div class="room-option" onclick="selectRoom('STANDARD QUEEN ROOM', 'https://img2.pic.in.th/237202fe1e7d474db.jpg')">
-        <div class="bg-image" style="background-image: url('https://img2.pic.in.th/237202fe1e7d474db.jpg');"></div>
+    <div class="room-option" onclick="selectRoom('STANDARD QUEEN ROOM', [
+        'https://img1.pic.in.th/images/190a4b43bec7fd689.jpg',
+        'https://img2.pic.in.th/222d5bffd6c1185c2.jpg',
+        'https://img1.pic.in.th/images/3c9545c92e2791c67.jpg',
+        'https://img1.pic.in.th/images/4b009b4077e463087.jpg',
+        'https://img2.pic.in.th/50253b0dcd3c979db.jpg'
+    ])">
+        <div class="bg-image" style="background-image: url('https://img1.pic.in.th/images/190a4b43bec7fd689.jpg');"></div>
         <div class="overlay"></div>
         <div class="room-content">
             <span class="en-name">STANDARD QUEEN ROOM</span>
@@ -142,9 +154,7 @@
         function selectRoom(roomName, imageUrls) {
             let mediaMessage;
 
-            // ตรวจสอบว่าเป็น Array (หลายรูป) หรือ String (รูปเดียว)
             if (Array.isArray(imageUrls)) {
-                // สร้าง Carousel สำหรับหลายรูป
                 const bubbles = imageUrls.map(url => ({
                     "type": "bubble",
                     "size": "micro",
@@ -167,7 +177,6 @@
                     }
                 };
             } else {
-                // ส่งเป็นรูปภาพปกติ
                 mediaMessage = {
                     "type": "image",
                     "originalContentUrl": imageUrls,
