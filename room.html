@@ -184,8 +184,8 @@
                 };
             }
 
+            // แก้ไข: ส่งเฉพาะ mediaMessage อย่างเดียว
             liff.sendMessages([
-                { "type": "text", "text": "ขอดูรูปภาพ " + roomName },
                 mediaMessage
             ]).then(() => {
                 liff.closeWindow();
