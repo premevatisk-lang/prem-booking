@@ -106,7 +106,12 @@
 
 <script>
     let userDisplayName = "";
-    const roomOptions = ["ห้องดีลักซ์ เตียงคู่ (Deluxe Twin)", "ห้องดีลักซ์ เตียงใหญ่ (Deluxe Queen)", "ห้องมาตรฐาน เตียงใหญ่ (Standard Queen)"];
+    // แก้ไข: เพิ่มข้อมูลชั้นในตัวเลือกห้องพัก
+    const roomOptions = [
+        "ห้องดีลักซ์ เตียงคู่ (Deluxe Twin) (ชั้น 1)", 
+        "ห้องดีลักซ์ เตียงใหญ่ (Deluxe Queen) (ชั้น 1)", 
+        "ห้องมาตรฐาน เตียงใหญ่ (Standard Queen) (ชั้น 2)"
+    ];
 
     window.onload = function() {
         const today = new Date();
@@ -219,7 +224,6 @@
         localStorage.setItem('prem_saved_name', customName);
         localStorage.setItem('prem_saved_phone', phone);
 
-        // แก้ไข: ตัดส่วน "🔔 แจ้งจองที่พักใหม่!\n" ออกตามคำขอ
         const msg = `👤 ชื่อ: ${customName}\n📞 โทร: ${phone}\n📅 เช็คอิน: ${cin.split('-').reverse().join('/')}\n📅 เช็คเอาท์: ${cout.split('-').reverse().join('/')}\n🌙 จำนวน: ${nights} คืน\n🧾 บิล: ${billOption}\n🏨 รายละเอียด:\n${roomText}`;
 
         liff.sendMessages([{ type: 'text', text: msg }]).then(() => {
